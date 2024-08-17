@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const TokenType = enum { HASH, LEFT_PAREN, RIGHT_PAREN, COMMA, DOT, SEMICOLON, BACKTICK, SINGLE_QUOTE, DOUBLE_QUOTE, EQUAL, STRING, INT, FLOAT, IDENTIFIER, EOF };
+const TokenType = enum { LEFT_PAREN, RIGHT_PAREN, LEFT_BRACKET, RIGHT_BRACKET, COMMA, DOT, COLON, SEMICOLON, BACKTICK, SINGLE_QUOTE, DOUBLE_QUOTE, EQUAL, BACKSLASH, HASH, IDENTIFIER, EOF };
 
 pub fn main() !void {
     var file = try std.fs.cwd().openFile("../../example/main.soul", .{});
