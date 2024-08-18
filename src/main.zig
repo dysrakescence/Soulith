@@ -2,63 +2,78 @@ const std = @import("std");
 
 const TokenType = enum { LEFT_PAREN, RIGHT_PAREN, LEFT_BRACKET, RIGHT_BRACKET, COMMA, DOT, COLON, SEMICOLON, BACKTICK, SINGLE_QUOTE, EQUAL, BACKSLASH, IDENTIFIER, STRING, INT, FLOAT, COMMENT, EOF };
 
-const Token = struct { kind: TokenType, lexeme: [32]u8 };
+const Token = struct { kind: TokenType, lexeme: [256]u8, length: u8 };
 
 pub fn main() !void {
     var file = try std.fs.cwd().openFile("../../example/main.soul", .{});
     defer file.close();
 
-    var reader = std.io.bufferedReader(file.reader()).reader();
+    var buf = std.io.bufferedReader(file.reader());
+    const reader = buf.reader();
 
     const stdout = std.io.getStdOut().writer();
 
-    var buf: [256]u8 = undefined;
-    while (try reader.read(&buf, '\n')) |line| {
-        for (line) |char| {
-            try stdout.print("{c}", .{char});
+    var token = try get_token_type(reader);
+    while (true) {
+        try stdout.print("{}:\n{s}\n", .{ token.kind, token.lexeme[0..token.length] });
+        if (get_token_type(reader)) |tok| {
+            token = tok;
+        } else |_| {
+            const tok = Token{ .kind = .EOF, .lexeme = undefined, .length = 0 };
+            try stdout.print("\n{}\n", .{tok.kind});
+            break;
         }
-        try stdout.print("\n", .{});
     }
 }
 
-fn get_token_type(reader: std.fs.File.Reader) !Token {
-    var buffer: [32]u8 = undefined;
+fn get_token_type(reader: anytype) !Token {
+    var buffer: [256]u8 = undefined;
     var char = try reader.readByte();
     while (std.ascii.isWhitespace(char))
         char = try reader.readByte();
     buffer[0] = char;
-    var index = 1;
-    if (std.ascii.isAlphabetic(char)) {
-        char = try reader.readByte();
-        while (std.ascii.isAlphanumeric(char)) : (index += 1) {
-            buffer[index] = char;
+    var index: u8 = 1;
+    switch (char) {
+        'a'...'z' => {
+            char = reader.readByte() catch 0;
+            while (std.ascii.isAlphanumeric(char)) : (index += 1) {
+                buffer[index] = char;
+                char = try reader.readByte();
+            }
+            return Token{ .kind = .IDENTIFIER, .lexeme = buffer, .length = index };
+        },
+        '0'...'9' => {
+            char = reader.readByte() catch 0;
+            var has_period = false;
+            while (std.ascii.isDigit(char) or char == '.' and !has_period) : (index += 1) {
+                const found = char == '.';
+                if (has_period and found)
+                    return error.UnexpectedSecondPeriod;
+                has_period = found or has_period;
+                buffer[index] = char;
+                char = try reader.readByte();
+            }
+            return Token{ .kind = if (has_period) .FLOAT else .INT, .lexeme = buffer, .length = index };
+        },
+        '#' => {
+            char = reader.readByte() catch '\n';
+            while (char != '\n' and char != '\r') : (index += 1) {
+                buffer[index] = char;
+                char = reader.readByte() catch '\n';
+            }
+            return Token{ .kind = .COMMENT, .lexeme = buffer, .length = index };
+        },
+        '"' => {
             char = try reader.readByte();
-        }
-        return Token{ .kind = TokenType.IDENTIFIER, .lexeme = buffer };
-    }
-    if (std.ascii.isDigit(char)) {
-        char = try reader.readByte();
-        var found_period = false;
-        while (std.ascii.isDigit(char) and !found_period) : (index += 1) {
-            if (found_period)
-                return error.UnexpectedSecondPeriod;
-            found_period = char == '.';
+            while (char != '"') : (index += 1) {
+                buffer[index] = char;
+                char = try reader.readByte();
+            }
             buffer[index] = char;
-            char = try reader.readByte();
-        }
-        const token_type = if (found_period)
-            TokenType.FLOAT
-        else
-            TokenType.INT;
-        return Token{ .kind = token_type, .lexeme = buffer };
+            return Token{ .kind = .STRING, .lexeme = buffer, .length = index + 1 };
+        },
+        '=' => return Token{ .kind = .EQUAL, .lexeme = buffer, .length = 1 },
+        '\'' => return Token{ .kind = .SINGLE_QUOTE, .lexeme = buffer, .length = 1 },
+        else => return Token{ .kind = .EOF, .lexeme = buffer, .length = 1 },
     }
-    if (char == '#') {
-        char = try reader.readByte();
-        while (char != '\n' and char != '\r') : (index += 1) {
-            buffer[index] = char;
-            char = try reader.readByte();
-        }
-        return Token{ .kind = TokenType.COMMENT, .lexeme = buffer };
-    }
-    return Token{ .kind = TokenType.EOF, .lexeme = buffer };
 }
