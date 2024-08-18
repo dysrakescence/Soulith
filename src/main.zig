@@ -13,10 +13,10 @@ pub fn main() !void {
 
     const stdout = std.io.getStdOut().writer();
 
-    var token = try get_token_type(reader);
+    var token = try get_token(reader);
     while (true) {
         try stdout.print("{}:\n{s}\n", .{ token.kind, token.lexeme[0..token.length] });
-        if (get_token_type(reader)) |tok| {
+        if (get_token(reader)) |tok| {
             token = tok;
         } else |_| {
             const tok = Token{ .kind = .EOF, .lexeme = undefined, .length = 0 };
@@ -26,7 +26,7 @@ pub fn main() !void {
     }
 }
 
-fn get_token_type(reader: anytype) !Token {
+fn get_token(reader: anytype) !Token {
     var buffer: [256]u8 = undefined;
     var char = try reader.readByte();
     while (std.ascii.isWhitespace(char))
