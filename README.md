@@ -18,11 +18,14 @@ A compiled programming language with a focus on built-in graphics capability
 
 ### Variable Declaration
 ```
-# Inferred type as float
-'pi = 3.14
+'pi = 3.14       # Immutable, inferred type as float
 
-# Inferred type as str
-'hello = "hello"
+# pi += 1
+# Error: Cannot modify `pi` because it is immutable
+
+.hello = "hello" # Mutable, inferred type as str
+
+hello += "!"     # hello becomes "hello!"
 ```
 
 ### Importing Libraries
@@ -45,50 +48,65 @@ A compiled programming language with a focus on built-in graphics capability
 # std is imported by default!
 # ::std.*
 
-# ">>" insert strings into a file
-"enter a number: " >> cout
+# ">>" insert strings into console output
+>> "enter a number: "
+
+# Equivalent to:
+# "enter a number: " >> cout
 
 # "<<" reads a line and returns result
 'first_input = << cin
-# entered: 2
+
+# Entered: 2
 # first_input == "2"
 
-"\nenter another number: " >> cout
+>> "\nenter another number: "
 
 # "<<" can also read a line and insert into existing strings
-'second_input = "1"
-second_input << cin
-# entered: 3
+.second_input = "1"
+
+second_input <<= cin
+# Equivalent to:
+# second_input = second_input << cin
+
+# Entered: 3
 # second_input == "13"
 
-# automatic string formatting via "{}"
-"\nresult: {to_int(first_input) + to_int(second_input)}\n" >> cout
-# output: result: 15
+# Automatic string formatting via "{}"
+>> "\nresult: {to_int(first_input) + to_int(second_input)}\n"
+
+# Output: result: 15
 ```
 
 ### Function Declaration
 ```
-# function names allow only alphabet characters and "_"
+# Function names allow only alphabet characters and "_"
 
-## function with inferred return type of void
+## Function with inferred return type of void
 'greet_user():
-	"hello user!\n" >> cout
+	>> "hello user!\n"
+
+# Somewhat equivalent to the following:
+# 'greet_user = ||:
+#    >> "hello user!\n"
 
 greet_user()
-# output: hello user!
+# Output: hello user!
 
-## function with single parameter, type must be specified
+## Function with single parameter, type must be specified
 'greet(user; str):
-	"hello {user}!\n" >> cout
+	>> "hello {user}!\n"
 
 greet("person")
-# output: hello person!
+# Output: hello person!
 
-# symbolic functions are declared using "`", and 
-# allow only unique characters like "<" and "+".
-# symbolic functions don't need parenthesis
-# when calling, and is not allowed to
-# have more than 2 parameters
+# Symbolically named functions are declared using "`",
+# and only allow the following characters:
+# +, -, /, *, ^, %, <, >, <<, >>
+
+# Symbolically named functions don't need parenthesis
+# when calling. Additionally, defining them also
+# automatically generate shortcuts like `+=` and `<<=`
 
 ## Two parameters are specified, the first one must
 ## be on the left side of the function when called.
@@ -97,8 +115,8 @@ greet("person")
 	"left{right}"
 
 # str + int, so the function "+" is called
-"forty-two is " + 42 > cout
-# output: forty-two is 42
+>> "forty-two is " + 42
+# Output: forty-two is 42
 ```
 
 ### Struct Declaration
@@ -107,10 +125,10 @@ greet("person")
 'Person:
 
 	# Fields with no default value must be type annotated
-	age; int
+	.age; int
 
 	# Fields with default value don't need type annotation
-	name = "anon"
+	.name = "anon"
 
 	# Static fields, these values stay with blueprints
 	# and are not initialized with new objects.
@@ -120,31 +138,37 @@ greet("person")
 	'Tall
 	'Short
 
-	height = Short
+	.height = Short
 
 'joe = Person(42)
 joe.name = "Joe"
-joe.height = Person:Tall
+joe.height = Person.Tall
 
-"{joe.name} is {joe.age} years old, and he's {Joe.height}." >> cout
-# output: Joe is 42 years old, and he's Tall.
+>> "{joe.name} is {joe.age} years old, and he's {joe.height}."
+# Output: Joe is 42 years old, and he's Tall.
 ```
 
 ### For Loop
 ```
 # All of these loops have the same output!
 
-i @ [0, 1, 2]:
-	"{i + 1}" >> cout
+'i @ [0, 1, 2]:
+	>> i + 1
 
-i @ 3:
-	" {i + 1}" >> cout
+>> " "
 
-i @ 1..4:
-	" {i}" >> cout
+'i @ 3:
+	>> i + 1
 
-i @ "012":
-	" {to_int(i) + 1}" >> cout
+>> " "
 
-# output: 123 123 123 123
+'i @ 1..4:
+	>> i
+
+>> " "
+
+'i @ "012":
+	>> to_int(i) + 1
+
+# Output: 123 123 123 123
 ```
