@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const TokenType = enum { LEFT_PAREN, RIGHT_PAREN, LEFT_BRACKET, RIGHT_BRACKET, COMMA, DOT, COLON, SEMICOLON, BACKTICK, SINGLE_QUOTE, EQUAL, BACKSLASH, IDENTIFIER, STRING, INT, FLOAT, COMMENT, EOF };
+const TokenType = enum { LeftParen, RightParen, LeftBracket, RightBracket, LeftBrace, RightBrace, Comma, Dot, Colon, Semicolon, Backtick, SingleQuote, Equal, Plus, Dash, Asterisk, Slash, Backslash, Identifier, String, Int, Float, Comment, EOF };
 
 const Token = struct { kind: TokenType, lexeme: [256]u8, length: u8 };
 
@@ -34,7 +34,7 @@ fn get_token(reader: anytype) !Token {
     buffer[0] = char;
     var index: u8 = 1;
     switch (char) {
-        'a'...'z' => {
+        'a'...'z', 'A'...'Z' => {
             char = reader.readByte() catch 0;
             while (std.ascii.isAlphanumeric(char)) : (index += 1) {
                 buffer[index] = char;
