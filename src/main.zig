@@ -40,7 +40,7 @@ fn get_token(reader: anytype) !Token {
                 buffer[index] = char;
                 char = try reader.readByte();
             }
-            return Token{ .kind = .IDENTIFIER, .lexeme = buffer, .length = index };
+            return Token{ .kind = .Identifier, .lexeme = buffer, .length = index };
         },
         '0'...'9' => {
             char = reader.readByte() catch 0;
@@ -53,7 +53,7 @@ fn get_token(reader: anytype) !Token {
                 buffer[index] = char;
                 char = try reader.readByte();
             }
-            return Token{ .kind = if (has_period) .FLOAT else .INT, .lexeme = buffer, .length = index };
+            return Token{ .kind = if (has_period) .Float else .Int, .lexeme = buffer, .length = index };
         },
         '#' => {
             char = reader.readByte() catch '\n';
@@ -61,7 +61,7 @@ fn get_token(reader: anytype) !Token {
                 buffer[index] = char;
                 char = reader.readByte() catch '\n';
             }
-            return Token{ .kind = .COMMENT, .lexeme = buffer, .length = index };
+            return Token{ .kind = .Comment, .lexeme = buffer, .length = index };
         },
         '"' => {
             char = try reader.readByte();
@@ -70,10 +70,10 @@ fn get_token(reader: anytype) !Token {
                 char = try reader.readByte();
             }
             buffer[index] = char;
-            return Token{ .kind = .STRING, .lexeme = buffer, .length = index + 1 };
+            return Token{ .kind = .String, .lexeme = buffer, .length = index + 1 };
         },
-        '=' => return Token{ .kind = .EQUAL, .lexeme = buffer, .length = 1 },
-        '\'' => return Token{ .kind = .SINGLE_QUOTE, .lexeme = buffer, .length = 1 },
+        '=' => return Token{ .kind = .Equal, .lexeme = buffer, .length = 1 },
+        '\'' => return Token{ .kind = .SingleQuote, .lexeme = buffer, .length = 1 },
         else => return Token{ .kind = .EOF, .lexeme = buffer, .length = 1 },
     }
 }
