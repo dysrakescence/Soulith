@@ -94,7 +94,7 @@ greet_user()
 # Output: hello user!
 
 ## Function with single parameter, type must be specified
-'greet(user; str):
+'greet(str user):
 	>> "hello {user}!\n"
 
 greet("person")
@@ -110,8 +110,8 @@ greet("person")
 
 ## Two parameters are specified, the first one must
 ## be on the left side of the function when called.
-## Inferred return type of str.
-`+(left; str, right; int):
+## Return type must be specified if not void.
+`+(str left, int right) str:
 	"left{right}"
 
 # str + int, so the function "+" is called
@@ -124,21 +124,20 @@ greet("person")
 # Blueprint for creating an object
 'Person:
 
-	# Fields with no default value must be type annotated
-	.age; int
-
-	# Fields with default value don't need type annotation
-	.name = "anon"
+	# Fields must be type annotated
+	int age
+	str name
 
 	# Static fields, these values stay with blueprints
-	# and are not initialized with new objects.
+	# and are not initialized with new instances.
 	# They can't be type annotated and must have a default
 	# value or else it would be treated as an enum.
 	'core = "heart"
 	'Tall
 	'Short
 
-	.height = Short
+	Person.* height
+	# equivalent to `Person.{Tall, Short}`
 
 'joe = Person(42)
 joe.name = "Joe"
