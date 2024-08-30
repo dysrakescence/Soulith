@@ -112,7 +112,7 @@ greet("person")
 ## be on the left side of the function when called.
 ## Return type must be specified if not void.
 `+(str left, int right) str:
-	"left{right}"
+	"{left}{right}"
 
 # str + int, so the function "+" is called
 >> "forty-two is " + 42
@@ -139,8 +139,7 @@ greet("person")
 	Person.* height
 	# equivalent to `Person.{Tall, Short}`
 
-'joe = Person(42)
-joe.name = "Joe"
+.joe = Person(42, Joe, Person.Short)
 joe.height = Person.Tall
 
 >> "{joe.name} is {joe.age} years old, and he's {joe.height}."
